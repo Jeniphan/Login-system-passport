@@ -1,8 +1,13 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+.form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
-
-a {
-  color: #00B7FF;
+.form-signin {
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  margin: auto;
+  background-color: #f3f3f3;
 }
