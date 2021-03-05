@@ -14,20 +14,20 @@ router.post('/register', async (req, res) => {
   res.redirect('/');
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   console.log(req.body);
   const { username, password } = req.body;
   const user = await mongod.findOne({
     username,
     password
   });
+
   if(user){
-    return  res.render('index',{user});
+    return  res.render('index',{ title: username });
   }
   else{
     return res.render('login',{ message: 'Email or Password incorrect'});
   }
-  res.redirect('/');
 });
 
 module.exports = router;
