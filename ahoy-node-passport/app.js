@@ -3,10 +3,14 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const passport = require('passport');
+const Localstrategy = require('passport-local').Strategy;
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var mongod = require('./routes/db');
+const mongodb = require('./routes/mongod');
 var app = express();
 
 // view engine setup
@@ -37,5 +41,36 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+passport.use(
+  new Localstrategy((username, password, cb) => {
+    mongodb.findOne({ username }, (err, user) => {
+      if (err){
+        return cb(err);
+      }
+      if (!user){
+        return cb(null, false);
+      }
+
+      if (bcrypt.compareSync(passwoed, user.password)){ 
+        return cb(null, user);
+      }
+      return cb(null, false);
+    });
+  })
+);
+
+passport.deserializeUser((id, cb) => {
+  mongodb.findById(id, (err, user) => {
+    if (err) {
+      return cb(err);
+    }
+    cb(nell, user);
+  });
+});
+
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 module.exports = app;
