@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-const mongod = require('./mongod');
+var mongod = require('./mongod');
+var bcrypt = require('bcrypt');
 
 /* GET users listing. 
 router.get('/', function(req, res, next) {
@@ -8,25 +9,44 @@ router.get('/', function(req, res, next) {
 });*/
 
 router.post('/register', async (req, res) => {
-  console.log(req.body);
-  const user = new mongod(req.body);
+  const { username, password, name } = req.body;
+
+  if (!name || !username || !password){
+    return res.render('register', { message: 'Please try agin'});
+  }
+  const passwordHash = bcrypt.hashSync(password, 10);
+  const user = new mongod({ 
+    name, 
+    username, 
+    password: passwordHash});
+
   await user.save();
-  res.redirect('/');
+  res.render('index', { username });
 });
 
 router.post('/login', async (req, res) => {
-  console.log(req.body);
   const { username, password } = req.body;
+
+  if (!username || !password){
+    return res.render('login', { message: 'Please try again' });
+  }
   const user = await mongod.findOne({
-    username,
-    password
+    username
   });
 
   if(user){
-    return  res.render('index',{ title: username });
+    const isCorrect = bcrypt.compareSync(password, user.password);
+
+    if (isCorrect){
+      return res.render('index',{ user });
+    }
+    else{
+      return res.render('login', { message: 'Username or Password incorect' });
+    }
+    
   }
   else{
-    return res.render('login',{ message: 'Email or Password incorrect'});
+    return res.render('login',{ message: 'Username dose not exist.'});
   }
 });
 
